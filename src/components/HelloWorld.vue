@@ -1,57 +1,108 @@
+<!--
 <template>
-  <div class="hello">
+   <div class="hello">
     <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
+    <button @click="getPageData(2)">取得該頁資料</button>
+    
+    <ul v-for="(entry, index) in pageEntry" :key="entry.index">
+      <li>
+        <a>{{index}}.{{entry.youtubeId}}, {{entry.Object}}, {{entry.filename}}</a>
+      </li>
     </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+  </div> 
+</template>
+-->
+<template>
+  <div id="app" class="align-items-center">
+    <br />
+    <!-- <div>currentPage: {{currentPage}}</div> -->
+    <b-pagination
+      size="md"
+      :total-rows="totalItems"
+      v-model="currentPage"
+      :per-page="perPage"
+      @input="getPageData(currentPage)"
+      align="center"
+    ></b-pagination>
+    <div class="row">
+      <div class="col-md-12">
+        <!-- 
+            <li v-for="item in posts" :key="item.id">
+            {{ item.id }} : {{ item.title }}
+            </li> 
+        -->
+        <ul v-for="(entry, index) in pageEntry" :key="entry.index">
+          <li>
+            <a>{{index}}.{{entry.youtubeId}}, {{entry.Object}}, {{entry.filename}}</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <br />
   </div>
 </template>
 
 <script>
+//Import axios for REST API calls
+import axios from "axios";
+import VueAxios from "vue-axios";
+//Import bootstrap CSS
+import "bootstrap/dist/css/bootstrap.css";
+//Import bootstrap vue CSS
+import "bootstrap-vue/dist/bootstrap-vue.css";
+
 export default {
-  name: 'HelloWorld',
+  name: "HelloWorld",
   props: {
     msg: String
-  }
-}
-</script>
+  },
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
-</style>
+  data: function() {
+    return {
+      allEntry: [],
+
+      currentPage: 1,
+      perPage: 10,
+      pageEntry: [],
+      totalItems: 0
+    };
+  },
+  methods: {
+    getPageData: function(currentPage = 1) {
+      let self = this;
+      let totalEntry = self.allEntry;
+      console.log("In getPageData");
+      console.log("perPage =", self.perPage);
+      console.log("totalEntry =", totalEntry);
+      console.log(totalEntry.slice(0, self.perPage));
+      self.pageEntry = totalEntry.slice(
+        self.perPage * (currentPage - 1),
+        self.perPage * currentPage
+      );
+      console.log(self.pageEntry);
+    }
+  },
+
+  created: function() {
+    let self = this;
+    axios({
+      methods: "get",
+      url: "http://140.96.0.34:50013/dataset/queryTrainYoloTag/04jm7VfInbo"
+    }).then(response => {
+      //self.data = response.data;
+      console.log(response.data.data);
+      //console.log(response.data.data.length);
+      var resdata = response.data.data;
+      self.allEntry = resdata;
+      self.totalItems = response.data.data.length;
+      console.log(self.totalItems);
+      console.log(self.allEntry);
+
+      this.getPageData(1); //init first page
+    });
+  },
+  mounted: function() {
+    // let self = this;
+  }
+};
+</script>
