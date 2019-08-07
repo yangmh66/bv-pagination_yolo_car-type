@@ -39,6 +39,8 @@
       </div>
     </div>
     <br />
+    <button @click="downLoadJpg()">取得該圖片資料</button>
+    <img :src="imgUrl" />
   </div>
 </template>
 
@@ -64,7 +66,8 @@ export default {
       currentPage: 1,
       perPage: 10,
       pageEntry: [],
-      totalItems: 0
+      totalItems: 0,
+      imgUrl: ""
     };
   },
   methods: {
@@ -80,6 +83,59 @@ export default {
         self.perPage * currentPage
       );
       console.log(self.pageEntry);
+    },
+    downLoadJpg: function() {
+      let self = this;
+      let url =
+        "http://140.96.0.34:50013/filterfun/getYoloImg/04jm7VfInbo/res_00000024.jpg";
+
+      // //this.$http.get("url", {
+      // axios
+      //   .get(url, {
+      //     responseType: "arraybuffer"
+      //   })
+      //   .then(function(response) {
+      //     //将从后台获取的图片流进行转换
+      //     return (
+      //       "data:image/jpeg;base64," +
+      //       btoa(
+      //         new Uint8Array(response.data).reduce(
+      //           (data, byte) => data + String.fromCharCode(byte),
+      //           ""
+      //         )
+      //       )
+      //     );
+      //   })
+      //   .then(function(data) {
+      //     //接收转换后的Base64图片
+      //     // obj.imgCodeUrl = data;
+      //     console.log(data);
+      //   })
+      //   .catch(function(err) {});
+      console.log("url: ", url);
+      //axios.get(url, { responseType: "arraybuffer" }).then(function(response) {
+      axios.get(url, { responseType: "blob" }).then(function(response) {
+        const content = response.data; //返回的文件流
+        console.log("content:", content);
+        const cnHeader = response.headers; //返回的headers
+        //const blob = new Blob([content], { type: "image/jpeg" }); //指定处理类型
+        const blob = new Blob([content], { type: "image/jpeg" });
+        //const blob = new Blob([content]);
+        //const fileName = "test.jpg"; //下载的文件名称
+        self.imgUrl = window.URL.createObjectURL(blob);
+        console.log(cnHeader);
+
+        console.log(self.imgUrl);
+
+        // let link = document.createElement("a");
+
+        // link.style.display = "none";
+        // link.href = url;
+        // link.setAttribute("download", "test.jpg");
+
+        // document.body.appendChild(link);
+        // link.click();
+      });
     }
   },
 
